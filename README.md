@@ -121,7 +121,7 @@ graph TD
 | LLM (estimation) | GPT-4o-mini |
 | Runtime | Python 3.13 |
 | Package manager | [uv](https://github.com/astral-sh/uv) |
-| Interface | Jupyter Notebook |
+| Interface | CLI (`system-design`) + Jupyter Notebook |
 
 ---
 
@@ -151,7 +151,32 @@ echo "OPENAI_API_KEY=sk-..." > .env
 
 ## Usage
 
-### Jupyter Notebook (recommended)
+### Command line (recommended)
+
+```bash
+uv run system-design "Design a URL shortener like bit.ly. \
+It needs to handle 100 million stored URLs and 1 billion redirects per day. \
+Redirection latency must be under 10ms at p99."
+```
+
+Options:
+
+```bash
+uv run system-design "<prompt>" --output design.md   # write the final doc to a file
+uv run system-design "<prompt>" --sections            # also print each specialist's individual output
+```
+
+Or call it as a library:
+
+```python
+from system_design_multi_agent_system import run_design
+
+result = run_design("Design a ride-sharing service like Uber...")
+print(result.final_document)      # final synthesized Markdown document
+print(result.sections)            # [(title, markdown), ...] per specialist agent
+```
+
+### Jupyter Notebook
 
 ```bash
 uv run jupyter notebook notebook/system_design_multi_agent_system.ipynb
@@ -167,18 +192,6 @@ uv run jupyter nbconvert --to notebook --execute --inplace \
   --ExecutePreprocessor.timeout=900
 ```
 
-### Change the prompt
-
-Edit the `user_prompt` variable in the run cell:
-
-```python
-user_prompt = (
-    'Design a ride-sharing service like Uber. '
-    'It must handle 10 million rides per day across 50 cities. '
-    'Location updates must propagate in under 500ms.'
-)
-```
-
 Any system design prompt works — URL shorteners, social feeds, payment systems, chat apps, etc.
 
 ---
@@ -187,10 +200,19 @@ Any system design prompt works — URL shorteners, social feeds, payment systems
 
 ```
 system_design_multi_agent_system/
+├── src/
+│   └── system_design_multi_agent_system/
+│       ├── __init__.py     # Exposes run_design()
+│       ├── llms.py         # LLM configuration (gpt-4o, gpt-4o-mini)
+│       ├── agents.py       # The 9 specialist Agent definitions
+│       ├── tasks.py        # The 9 sequential Task definitions
+│       ├── crew.py         # Assembles agents + tasks into a Crew
+│       ├── runner.py       # run_design() — kicks off the crew, returns results
+│       └── main.py         # CLI entry point (`system-design`)
 ├── notebook/
-│   └── system_design_multi_agent_system.ipynb   # Main notebook
+│   └── system_design_multi_agent_system.ipynb   # Interactive notebook version
 ├── .env                                          # OPENAI_API_KEY (not committed)
-├── pyproject.toml                                # Project dependencies
+├── pyproject.toml                                # Project dependencies + CLI entry point
 ├── uv.lock                                       # Locked dependency versions
 └── README.md
 ```
