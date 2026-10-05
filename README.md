@@ -66,7 +66,7 @@ The final document follows this 9-section format, suitable for a system design i
 
 ## 1. Requirements
 ## 2. Capacity Estimation
-## 3. High-Level Architecture       ← includes Mermaid diagram
+## 3. High-Level Architecture       
 ## 4. Data Model
 ## 5. API Design
 ## 6. Scalability
@@ -77,40 +77,6 @@ The final document follows this 9-section format, suitable for a system design i
 
 ---
 
-## Example
-
-**Input prompt:**
-```
-Design a URL shortener service like bit.ly.
-It needs to handle 100 million stored URLs and 1 billion redirects per day.
-Redirection latency must be under 10ms at p99.
-```
-
-**Sample output (Section 3 — Architecture):**
-```mermaid
-graph TD
-    A[API Gateway] --> B[URL Shortening Service]
-    A --> C[Redirection Service]
-    A --> D[User Management Service]
-    B --> E[Storage Service]
-    C --> E
-    C --> F[CDN]
-    B --> G[Message Queue]
-    G --> H[Analytics Service]
-    H --> I[Object Storage]
-```
-
-**Sample output (Section 2 — Capacity):**
-
-| Metric | Value |
-|--------|-------|
-| DAU | 1,000,000 |
-| Peak Read QPS | ~11,600 |
-| Peak Write QPS | ~230 |
-| 5-Year Storage | ~183 TB |
-| Read : Write Ratio | 50 : 1 |
-
----
 
 ## Tech Stack
 
@@ -176,26 +142,6 @@ print(result.final_document)      # final synthesized Markdown document
 print(result.sections)            # [(title, markdown), ...] per specialist agent
 ```
 
-### Jupyter Notebook
-
-```bash
-uv run jupyter notebook notebook/system_design_multi_agent_system.ipynb
-```
-
-Open the notebook, change the `user_prompt` in **Section 6**, then run all cells.
-
-### Command line (nbconvert)
-
-```bash
-uv run jupyter nbconvert --to notebook --execute --inplace \
-  notebook/system_design_multi_agent_system.ipynb \
-  --ExecutePreprocessor.timeout=900
-```
-
-Any system design prompt works — URL shorteners, social feeds, payment systems, chat apps, etc.
-
----
-
 ## Project Structure
 
 ```
@@ -224,14 +170,7 @@ system_design_multi_agent_system/
 **Why sequential instead of parallel?**
 CrewAI 1.x requires that async tasks only reference sync tasks in their `context`. Since later agents (Data Modeler, API Designer) benefit from the Architect's output, fully sequential execution is both simpler and produces higher quality results — each agent builds on complete prior knowledge.
 
-**Why `ThreadPoolExecutor` in the notebook?**
-Jupyter keeps its own asyncio event loop running. CrewAI's sync execution bridge (`loop.run_until_complete`) raises `RuntimeError: This event loop is already running` in that context. Running the crew in a worker thread gives it a fresh thread with no running event loop.
-
 **Why two LLMs?**
 The Capacity Estimator performs structured arithmetic — it doesn't need GPT-4o's reasoning depth. Using GPT-4o-mini for that task cuts cost and latency without affecting output quality.
 
----
 
-## License
-
-MIT
