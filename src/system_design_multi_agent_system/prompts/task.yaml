@@ -1,0 +1,188 @@
+# Task definitions, in pipeline order. `agent` is a key in agents.yaml;
+# `context` lists the task keys whose output this task receives.
+# `{user_prompt}` is interpolated by CrewAI at kickoff.
+
+requirements_task:
+  agent: requirements_analyst
+  context: []
+  description: |-
+    Analyze the following system design prompt and produce a structured requirements document.
+
+    User Prompt: {user_prompt}
+
+    Your output must include:
+    1. **Functional Requirements** — Core features the system must support (5-8 items)
+    2. **Non-Functional Requirements** — Scale targets, latency SLA, availability SLA, consistency model
+    3. **User Personas** — Who uses this system and what their primary interaction looks like
+    4. **Assumptions** — What you are assuming because it is not stated in the prompt
+    5. **Out of Scope** — What this design will deliberately NOT cover
+  expected_output: >-
+    A structured requirements document with five clearly labeled sections:
+    functional requirements, non-functional requirements, user personas, assumptions, out of scope.
+
+capacity_task:
+  agent: capacity_estimator
+  context: [requirements_task]
+  description: |-
+    Using the requirements document, perform back-of-envelope capacity calculations.
+
+    Show your working for each item below:
+    1. **Users** — DAU and MAU
+    2. **Traffic** — Average and peak Read QPS, Average and peak Write QPS
+    3. **Storage** — Size per record, daily writes, 5-year total
+    4. **Bandwidth** — Inbound and outbound
+    5. **Servers** — Estimated application and database server counts
+    6. **Ratios** — Read:Write ratio, hot vs cold data split
+
+    End with a summary table of all key numbers.
+  expected_output: >-
+    A capacity estimation report with step-by-step calculations, explicit assumptions,
+    and a summary table of all key metrics.
+
+architecture_task:
+  agent: system_architect
+  context: [requirements_task, capacity_task]
+  description: |-
+    Design the high-level system architecture using the requirements and capacity estimates.
+
+    1. **Architecture Style** — Microservices / Monolith / Serverless with explicit justification
+    2. **Core Components** — Each service or component with its single clear responsibility
+    3. **Component Diagram** — Full system topology in Mermaid notation (graph TD)
+    4. **Request Flow** — End-to-end walkthrough of a typical user request
+    5. **External Dependencies** — CDN, object storage, third-party and cloud services
+    6. **Communication** — Where to use synchronous (REST/gRPC) vs asynchronous (queues) and why
+  expected_output: >-
+    An architecture document with a component list, a Mermaid graph TD diagram,
+    an end-to-end request flow, and justification for every key architectural decision.
+
+data_model_task:
+  agent: data_modeler
+  context: [requirements_task, capacity_task, architecture_task]
+  description: |-
+    Design the data model and database strategy, building on the architecture decisions.
+
+    1. **Database Choices** — Which database(s) (SQL/NoSQL/Cache/Search) and why for each
+    2. **Core Schemas** — Key tables or collections with fields and data types
+    3. **Indexing Strategy** — Primary and secondary indexes for the main query patterns
+    4. **Partitioning** — How data is sharded or partitioned across nodes
+    5. **Access Patterns** — The 3-5 most critical read and write operations
+    6. **Data Lifecycle** — Archival policy, TTL settings, hot/warm/cold tiers
+  expected_output: >-
+    A data modeling document with justified database selections, schema definitions,
+    indexing strategy, partitioning approach, and data lifecycle policy.
+
+api_design_task:
+  agent: api_designer
+  context: [requirements_task, capacity_task, architecture_task, data_model_task]
+  description: |-
+    Design the API contracts, consistent with the architecture and data model.
+
+    1. **API Style** — REST, GraphQL, or gRPC with explicit justification
+    2. **Core Endpoints** — Method, path, request body, response schema, status codes
+    3. **Authentication** — Auth mechanism (JWT/OAuth2/API keys) and authorization model
+    4. **Rate Limiting** — Limits per endpoint, per user, per tenant
+    5. **Versioning** — Versioning strategy (URL path, header, or query param)
+    6. **Error Handling** — Standard error response format with machine-readable codes
+  expected_output: >-
+    An API design document with OpenAPI-style endpoint specs, auth strategy,
+    rate limiting rules, versioning approach, and error response format.
+
+scalability_task:
+  agent: scalability_engineer
+  context: [requirements_task, capacity_task, architecture_task, data_model_task, api_design_task]
+  description: |-
+    Design the scalability strategy to handle the estimated load and traffic peaks.
+
+    1. **Load Balancing** — Algorithm and layer (L4/L7) with configuration details
+    2. **Caching** — What to cache, where (client/CDN/app/DB), and invalidation strategy
+    3. **Horizontal Scaling** — Auto-scaling policies and stateless service design
+    4. **Database Scaling** — Read replicas, write sharding, connection pooling
+    5. **Async Processing** — Queue-based offloading for non-latency-critical operations
+    6. **Rate Limiting** — Protecting downstream services from traffic spikes
+  expected_output: >-
+    A scalability document covering caching with invalidation, load balancing config,
+    auto-scaling rules, database scaling approach, and async processing patterns.
+
+reliability_task:
+  agent: reliability_engineer
+  context:
+    - requirements_task
+    - capacity_task
+    - architecture_task
+    - data_model_task
+    - api_design_task
+    - scalability_task
+  description: |-
+    Design the reliability, fault tolerance, and observability strategy.
+
+    1. **Failure Modes** — Top 5 failure scenarios and exactly how the system handles each
+    2. **Replication** — Data replication strategy and consistency guarantee
+    3. **Circuit Breakers & Retries** — Where to apply, timeout values, backoff policies
+    4. **Disaster Recovery** — RTO and RPO targets, backup strategy, multi-region failover
+    5. **Observability** — Key metrics (RED/USE), alert thresholds, distributed tracing
+    6. **Deployment** — Blue-green, canary, or rolling deployment with rollback plan
+  expected_output: >-
+    A reliability document covering failure modes, replication strategy,
+    circuit breaker config, DR plan with RTO/RPO targets, and observability stack.
+
+critique_task:
+  agent: critic
+  context:
+    - requirements_task
+    - capacity_task
+    - architecture_task
+    - data_model_task
+    - api_design_task
+    - scalability_task
+    - reliability_task
+  description: |-
+    Review all seven specialist documents and produce a critical assessment.
+
+    1. **Bottlenecks** — Where will the system degrade or break under load?
+    2. **Single Points of Failure** — Which components take the whole system down if they fail?
+    3. **Consistency Gaps** — Where could data become stale or inconsistent?
+    4. **Missing Pieces** — What critical components are absent from any specialist design?
+    5. **Over-Engineering** — Where is complexity unjustified by the requirements?
+    6. **Trade-offs** — What important trade-offs were made explicitly or left implicit?
+    7. **Recommendations** — Specific fixes labeled High / Medium / Low priority
+  expected_output: >-
+    A critical review with issues labeled by severity (High/Medium/Low),
+    identified trade-offs with implications, and concrete prioritized recommendations.
+
+synthesis_task:
+  agent: synthesizer
+  context:
+    - requirements_task
+    - capacity_task
+    - architecture_task
+    - data_model_task
+    - api_design_task
+    - scalability_task
+    - reliability_task
+    - critique_task
+  description: |-
+    Synthesize all eight specialist outputs into one final system design document.
+
+    Use exactly this structure:
+
+    # System Design: [System Name]
+
+    ## 1. Requirements
+    ## 2. Capacity Estimation
+    ## 3. High-Level Architecture
+    ## 4. Data Model
+    ## 5. API Design
+    ## 6. Scalability
+    ## 7. Reliability & Fault Tolerance
+    ## 8. Key Trade-offs & Design Decisions
+    ## 9. Future Improvements
+
+    Rules:
+    - Include the Mermaid diagram from the architect verbatim in section 3
+    - Include the summary table from the capacity estimator verbatim in section 2
+    - Integrate the critic's findings into section 8
+    - Resolve any contradictions between specialist outputs
+    - The result must be ready for a system design interview or an internal RFC
+  expected_output: >-
+    A complete Markdown system design document with all 9 sections,
+    the Mermaid diagram, capacity table, API specs, and trade-offs documented.

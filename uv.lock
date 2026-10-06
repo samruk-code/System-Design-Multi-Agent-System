@@ -2640,6 +2640,7 @@ dependencies = [
     { name = "crewai" },
     { name = "nest-asyncio" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -2647,6 +2648,7 @@ requires-dist = [
     { name = "crewai", specifier = ">=1.15.0" },
     { name = "nest-asyncio", specifier = ">=1.6.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]
