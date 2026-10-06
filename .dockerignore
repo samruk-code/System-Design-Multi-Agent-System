@@ -1,0 +1,11 @@
+.venv
+.git
+.env
+.claude
+__pycache__
+*.py[oc]
+dist
+build
+*.egg-info
+.DS_Store
+design.md
