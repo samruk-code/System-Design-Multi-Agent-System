@@ -10,7 +10,7 @@ from pathlib import Path
 import yaml
 from crewai import Agent
 
-from . import llms
+from system_design_multi_agent_system import llms
 
 _CONFIG = yaml.safe_load((Path(__file__).parent / "prompts" / "agents.yaml").read_text(encoding="utf-8"))
 
@@ -30,3 +30,8 @@ scalability_engineer = _build("scalability_engineer")
 reliability_engineer = _build("reliability_engineer")
 critic = _build("critic")
 synthesizer = _build("synthesizer")
+
+
+
+if __name__ == "__main__":
+    print(_CONFIG)
