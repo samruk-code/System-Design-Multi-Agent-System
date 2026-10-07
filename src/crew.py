@@ -2,7 +2,7 @@
 
 from crewai import Crew, Process
 
-from .agents import (
+from agents import (
     api_designer,
     capacity_estimator,
     critic,
@@ -13,7 +13,7 @@ from .agents import (
     synthesizer,
     system_architect,
 )
-from .tasks import ALL_TASKS
+from tasks import ALL_TASKS
 
 crew = Crew(
     agents=[

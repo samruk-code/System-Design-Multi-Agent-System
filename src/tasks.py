@@ -10,7 +10,7 @@ from pathlib import Path
 import yaml
 from crewai import Task
 
-from . import agents
+import agents
 
 _CONFIG = yaml.safe_load((Path(__file__).parent / "prompts" / "task.yaml").read_text(encoding="utf-8"))
 

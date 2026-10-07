@@ -8,7 +8,7 @@ Usage:
 import argparse
 import sys
 
-from .runner import run_design
+from runner import run_design
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

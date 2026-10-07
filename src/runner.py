@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
-from .crew import crew
-from .tasks import SPECIALIST_SECTIONS
+from crew import crew
+from tasks import SPECIALIST_SECTIONS
 
 load_dotenv()
 

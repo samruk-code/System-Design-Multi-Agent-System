@@ -135,7 +135,7 @@ uv run system-design "<prompt>" --sections            # also print each speciali
 Or call it as a library:
 
 ```python
-from system_design_multi_agent_system import run_design
+from runner import run_design  # with src/ on PYTHONPATH
 
 result = run_design("Design a ride-sharing service like Uber...")
 print(result.final_document)      # final synthesized Markdown document
@@ -147,14 +147,13 @@ print(result.sections)            # [(title, markdown), ...] per specialist agen
 ```
 system_design_multi_agent_system/
 ├── src/
-│   └── system_design_multi_agent_system/
-│       ├── __init__.py     # Exposes run_design()
-│       ├── llms.py         # LLM configuration (gpt-4o, gpt-4o-mini)
-│       ├── agents.py       # The 9 specialist Agent definitions
-│       ├── tasks.py        # The 9 sequential Task definitions
-│       ├── crew.py         # Assembles agents + tasks into a Crew
-│       ├── runner.py       # run_design() — kicks off the crew, returns results
-│       └── main.py         # CLI entry point (`system-design`)
+│   ├── llms.py         # LLM configuration (gpt-4o, gpt-4o-mini)
+│   ├── agents.py       # The 9 specialist Agent definitions
+│   ├── tasks.py        # The 9 sequential Task definitions
+│   ├── crew.py         # Assembles agents + tasks into a Crew
+│   ├── runner.py       # run_design() — kicks off the crew, returns results
+│   ├── main.py         # CLI entry point (`system-design`)
+│   └── prompts/        # agents.yaml, task.yaml
 ├── notebook/
 │   └── system_design_multi_agent_system.ipynb   # Interactive notebook version
 ├── .env                                          # OPENAI_API_KEY (not committed)

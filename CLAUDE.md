@@ -36,7 +36,7 @@ The pipeline is a strict sequential chain of 9 CrewAI `Agent`/`Task` pairs (`Pro
 8. Critic → bottlenecks, SPOFs, trade-off analysis
 9. Synthesizer → merges all 8 prior outputs into the final Markdown document
 
-All agents except the Capacity Estimator use `llm` (gpt-4o); the Capacity Estimator uses `llm_fast` (gpt-4o-mini) since its task is structured arithmetic rather than open-ended reasoning (`src/system_design_multi_agent_system/llms.py`).
+All agents except the Capacity Estimator use `llm` (gpt-4o); the Capacity Estimator uses `llm_fast` (gpt-4o-mini) since its task is structured arithmetic rather than open-ended reasoning (`src/llms.py`).
 
 Module responsibilities:
 - `agents.py` — the 9 `Agent` definitions (role/goal/backstory/llm)
